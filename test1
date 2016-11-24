@@ -1,0 +1,111 @@
+
+set more off
+
+recode Sex (-999/-1=.), gen(sex)
+
+recode Rage5 (-1=.), gen(age5)
+recode Rage3 (-1=.), gen(age3)
+
+
+* BIO COMPONENTS *
+
+* general health * 
+recode GHealth (1=100)(2=75)(3=50)(2=25)(1=0)(-999/-1=.), gen(health)
+
+* illness - yes or no *
+
+recode Zdill (1=100)(-999/-1=.), gen(ill)
+
+* gen BIO component * 
+
+gen BIO = (health + ill)/2
+
+
+* anxiety - recoded to be positve * 
+
+recode WellB3 (0=100)(1=90)(2=80)(3=70)(4=60)(5=50)(6=40)(7=30)(8=20)(9=10)(10=0)(-999/-1=.), gen(anx)
+
+* life sat *
+
+gen lifesat = WellB1*10
+recode lifesat (-999/-1=.)
+
+* happiness * 
+
+gen happy = WellB2*10
+recode happy (-999/-1=.)
+
+
+* things * 
+
+gen things = WellB4*10 
+recode things (-999/-1=.)
+
+
+
+
+* gen PSYCHOLOGICAL component *
+
+gen PSY = (anx + lifesat + happy + things)/4
+
+
+* GEN SA *
+
+gen SA = (PSY + BIO)/2
+
+
+zscore SA
+
+
+**** ENVIRONMENTAL EXPOSURES ****
+
+
+* access to *
+
+recode AssetsA (-999/-1=.), gen(grocer)
+recode AssetsB (-999/-1=.), gen(pub)
+recode AssetsC (-999/-1=.), gen(park)
+recode AssetsD (-999/-1=.), gen(library)
+recode AssetsE (-999/-1=.), gen(comcent)
+recode AssetsF (-999/-1=.), gen(sportcent)
+recode AssetsG (-999/-1=.), gen(youthcent)
+recode AssetsH (-999/-1=.), gen(healthcent)
+recode AssetsI (-999/-1=.), gen(chemist)
+recode AssetsJ (-999/-1=.), gen(postoffice)
+recode AssetsK (-999/-1=.), gen(primschool)
+recode AssetsL (-999/-1=.), gen(secschool)
+recode AssetsM (-999/-1=.), gen(church)
+recode AssetsN (-999/-1=.), gen(pubtransport)
+
+
+* security features *
+recode OBS41 (-999/-1=.), gen(lockedent)
+recode OBS42 (-999/-1=.), gen(lockedgate)
+recode OBS43 (-999/-1=.), gen(gatekeeper)
+recode OBS41 (-999/-1=.), gen(entryphone)
+
+recode SSafe (-999/-1=.)(1=100)(2=66.67)(3=33.33)(4=0)(5=.), gen (walksafe)
+
+* Location 
+
+* Inner = inner city * 
+
+* Rural2 = rural *
+
+
+* type of house *
+
+clonevar housing = OBS3
+recode housing (6/7=6)(8/11=.)
+
+
+
+
+*** ANALYSIS ***
+
+foreach var of varlist XXXXXXX {
+regress SA age3 Sex `var'
+by age3, sort: regress SA Sex `var'
+by age3, sort: regress SA `var' if(Sex==1)
+by age3, sort: regress SA `var' if(Sex==2)
+}
